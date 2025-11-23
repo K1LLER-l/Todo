@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load mis_filtros %} {% block content %}
+<div class="container-fluid mt-4 pb-5">
+    <div class="row">
+        
+        <aside class="col-md-3 col-lg-2 d-none d-md-block">
+            {% include 'menu/sidebar.html' %}
+        </aside>
+
+        <main class="col-md-9 col-lg-10">
+            
+            {% if destacados %}
+            <div class="mb-5">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-fire text-danger"></i> Lo más popular hoy</h4>
+                <div class="row row-cols-1 row-cols-md-3 g-3">
+                    {% for prod in destacados %}
+                    <div class="col">
+                        <div class="card border-0 shadow-sm h-100 bg-light">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-4 p-2 text-center">
+                                    <a href="{% url 'product_detail' prod.id %}">
+                                        <img src="{{ prod.image_url }}" class="img-fluid rounded" alt="{{ prod.name }}" style="max-height: 80px; object-fit: contain;">
+                                    </a>
+                                </div>
+                                <div class="col-8">
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1 text-truncate">
+                                            <a href="{% url 'product_detail' prod.id %}" class="text-dark text-decoration-none" style="font-size: 0.9rem;">
+                                                {{ prod.name }}
+                                            </a>
+                                        </h6>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-white text-danger border border-danger rounded-pill">
+                                                <i class="bi bi-heart-fill"></i> {{ prod.num_likes }}
+                                            </span>
+                                            <a href="{% url 'product_detail' prod.id %}" class="btn btn-sm btn-dark rounded-pill px-3" style="font-size: 0.8rem;">Ver</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <hr class="mb-4">
+            {% endif %}
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2 fw-bold text-dark">Catálogo</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <form method="GET" class="d-flex align-items-center" id="sortForm">
+                        <input type="hidden" name="q" value="{{ search_query }}">
+                        <input type="hidden" name="category" value="{{ current_category }}">
+                        <input type="hidden" name="max_price" value="{{ current_max_price }}">
+                        <label class="me-2 text-muted small">Ordenar:</label>
+                        <select name="sort" class="form-select form-select-sm" onchange="document.getElementById('sortForm').submit()">
+                            <option value="default" {% if not request.GET.sort or request.GET.sort == 'default' %}selected{% endif %}>Relevancia</option>
+                            <option value="price-asc" {% if request.GET.sort == 'price-asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                            <option value="price-desc" {% if request.GET.sort == 'price-desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm product-card position-relative">
+                        
+                        <div class="position-absolute top-0 start-0 m-2 z-3">
+                            <input type="checkbox" 
+                                   class="form-check-input border-2 border-primary shadow-sm compare-checkbox" 
+                                   style="width: 1.5em; height: 1.5em; cursor: pointer;"
+                                   value="{{ product.id }}"
+                                   onclick="toggleComparacion(this, event)">
+                        </div>
+
+                        <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                            <div class="position-relative text-center p-3 bg-white rounded-top">
+                                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 180px; object-fit: contain;">
+                                <span class="position-absolute top-0 end-0 badge bg-light text-dark m-2 border">{{ product.protein_grams }} Prot.</span>
+                            </div>
+                        </a>
+
+                        <div class="card-body d-flex flex-column bg-white">
+                            <small class="text-muted text-uppercase" style="font-size: 0.75rem;">{{ product.brand }}</small>
+                            <h5 class="card-title fs-6 mb-3">
+                                <a href="{% url 'product_detail' product.id %}" class="text-dark text-decoration-none fw-bold">
+                                    {{ product.name|truncatechars:50 }}
+                                </a>
+                            </h5>
+
+                            <div class="mt-auto">
+                                {% if product.precio_minimo %}
+                                    <div class="text-muted small mb-0">Desde</div>
+                                    <div class="fs-4 fw-bold text-primary">{% precio product.precio_minimo %}</div>
+                                {% else %}
+                                    <div class="text-muted small mb-0">Estado</div>
+                                    <div class="fs-5 fw-bold text-secondary">Sin ofertas</div>
+                                {% endif %}
+
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary btn-sm w-100 mt-2 rounded-pill">
+                                    Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <h3 class="text-muted">No se encontraron productos</h3>
+                    <a href="{% url 'home' %}" class="btn btn-primary mt-3">Limpiar Filtros</a>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<div id="compareBar" class="fixed-bottom bg-dark text-white p-3 shadow-lg d-none" style="border-top: 4px solid #ffc107;">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0 fw-bold"><i class="bi bi-check2-square text-warning me-2"></i><span id="countSelected">0</span> productos seleccionados</h5>
+            <small class="text-light opacity-75">Selecciona hasta 4 para comparar</small>
+        </div>
+        <div>
+            <button onclick="limpiarSeleccion()" class="btn btn-outline-light me-2">Cancelar</button>
+            <a id="btnComparar" href="#" class="btn btn-warning fw-bold text-dark px-4 disabled" aria-disabled="true">
+                Selecciona otro...
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedIds = [];
+
+    function toggleComparacion(checkbox, event) {
+        event.stopPropagation();
+        const id = checkbox.value;
+
+        if (checkbox.checked) {
+            if (selectedIds.length >= 4) {
+                alert("Solo puedes comparar hasta 4 productos a la vez.");
+                checkbox.checked = false;
+                return;
+            }
+            selectedIds.push(id);
+        } else {
+            selectedIds = selectedIds.filter(item => item !== id);
+        }
+        actualizarBarra();
+    }
+
+    function actualizarBarra() {
+        const bar = document.getElementById('compareBar');
+        const countSpan = document.getElementById('countSelected');
+        const btn = document.getElementById('btnComparar');
+
+        countSpan.innerText = selectedIds.length;
+
+        if (selectedIds.length < 2) {
+            btn.classList.add('disabled'); 
+            btn.setAttribute('aria-disabled', 'true');
+            btn.href = "#";
+            btn.innerText = "Selecciona otro...";
+        } else {
+            btn.classList.remove('disabled');
+            btn.removeAttribute('aria-disabled');
+            const urlBase = "{% url 'comparar_productos' %}";
+            btn.href = `${urlBase}?ids=${selectedIds.join(',')}`;
+            btn.innerHTML = 'Comparar Ahora <i class="bi bi-arrow-right-circle-fill ms-2"></i>';
+        }
+
+        if (selectedIds.length > 0) {
+            bar.classList.remove('d-none');
+        } else {
+            bar.classList.add('d-none');
+        }
+    }
+
+    function limpiarSeleccion() {
+        selectedIds = [];
+        document.querySelectorAll('.compare-checkbox').forEach(cb => cb.checked = false);
+        actualizarBarra();
+    }
+</script>
+
+<style>
+    .product-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+    .z-3 { z-index: 1050 !important; }
+</style>
+{% endblock %}

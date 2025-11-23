@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-table me-2 text-primary"></i>Comparación Nutricional</h2>
+        <a href="{% url 'home' %}" class="btn btn-outline-dark btn-sm">Volver al Catálogo</a>
+    </div>
+
+    {% if productos %}
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-bordered table-hover text-center bg-white align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 200px;" class="text-start ps-4">Características</th>
+                    {% for prod in productos %}
+                    <th style="min-width: 220px;">
+                        <a href="#" class="text-muted float-end text-decoration-none fs-5" onclick="removerProducto('{{ prod.id }}')">&times;</a>
+                        
+                        <div class="p-3">
+                            <img src="{{ prod.image_url }}" class="img-fluid mb-3" style="height: 120px; object-fit: contain;">
+                            <h6 class="fw-bold mb-1">
+                                <a href="{% url 'product_detail' prod.id %}" class="text-dark text-decoration-none">{{ prod.name|truncatechars:40 }}</a>
+                            </h6>
+                            <small class="text-muted">{{ prod.brand }}</small>
+                        </div>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-start ps-4 bg-light">Mejor Precio</th>
+                    {% for prod in productos %}
+                    <td>
+                        {% if prod.precio_minimo %}
+                            <span class="fw-bold text-primary fs-5">${{ prod.precio_minimo }}</span>
+                        {% else %}
+                            <span class="text-muted">--</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <th class="text-start ps-4 bg-light">Proteínas por porción</th>
+                    {% for prod in productos %}
+                    <td class="fw-bold">
+                        {% if prod.protein_grams != "N/A" %}
+                            <span class="badge bg-success fs-6">{{ prod.protein_grams }}</span>
+                        {% else %}
+                            <span class="text-muted">No disponible</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <th class="text-start ps-4 bg-light">Categoría</th>
+                    {% for prod in productos %}
+                    <td>{{ prod.categoria.name }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <th class="text-start ps-4 bg-light">Acción</th>
+                    {% for prod in productos %}
+                    <td class="p-3">
+                        <a href="{% url 'product_detail' prod.id %}" class="btn btn-outline-primary w-100">Ver Detalles</a>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning text-center py-5">
+            <h4>No has seleccionado productos para comparar</h4>
+            <p>Vuelve al catálogo y selecciona al menos dos productos.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary mt-3">Ir al Catálogo</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Función simple para quitar un producto de la URL y recargar
+    function removerProducto(idToRemove) {
+        const urlParams = new URLSearchParams(window.location.search);
+        let ids = urlParams.get('ids').split(',');
+        
+        // Filtrar el ID que queremos borrar
+        ids = ids.filter(id => id != idToRemove);
+        
+        if (ids.length > 0) {
+            window.location.href = `?ids=${ids.join(',')}`;
+        } else {
+            window.location.href = "{% url 'home' %}";
+        }
+    }
+</script>
+{% endblock %}

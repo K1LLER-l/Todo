@@ -1,0 +1,12 @@
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #27ae60;
+    --bg-color: #f8f9fa;
+}
+body { background-color: var(--bg-color); font-family: 'Segoe UI', sans-serif; }
+.sidebar { min-height: 100vh; background-color: white; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+.product-card { transition: transform 0.2s, box-shadow 0.2s; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+.price-tag { font-size: 1.25rem; font-weight: bold; color: var(--primary-color); }
+.protein-badge { background-color: var(--accent-color); color: white; font-size: 0.8rem; padding: 5px 10px; border-radius: 20px; }
+.navbar-custom { background-color: var(--primary-color); }

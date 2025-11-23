@@ -1,0 +1,38 @@
+<nav class="sidebar p-3">
+    <h5 class="text-uppercase text-muted mb-3 font-weight-bold">Categorías</h5>
+    <div class="list-group mb-4">
+        <a href="?category=all" class="list-group-item list-group-item-action {% if current_category == 'all' %}active{% endif %}">
+            📦 Todo
+        </a>
+        {% for cat in categories %}
+        <a href="?category={{ cat.name }}" class="list-group-item list-group-item-action {% if current_category == cat.name %}active{% endif %}">
+            🔹 {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if max_price_db %}
+        <h5 class="text-uppercase text-muted mb-3">Precio Máximo</h5>
+        
+        <form method="GET" action="{% url 'home' %}">
+            <input type="hidden" name="q" value="{{ search_query }}">
+            <input type="hidden" name="category" value="{{ current_category }}">
+            <input type="hidden" name="sort" value="{{ request.GET.sort|default:'default' }}">
+
+            <div class="d-flex justify-content-between mb-2">
+                <small>$0</small>
+                <small class="fw-bold text-primary">$<span id="priceValue">{{ current_max_price|default:max_price_db }}</span></small>
+            </div>
+            
+            <input type="range" 
+                   class="form-range" 
+                   name="max_price" 
+                   id="priceRange" 
+                   min="0" 
+                   max="{{ max_price_db }}" 
+                   value="{{ current_max_price|default:max_price_db }}"
+                   oninput="document.getElementById('priceValue').innerText = this.value"
+                   onchange="this.form.submit()"> 
+        </form>
+    {% endif %}
+</nav>

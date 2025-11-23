@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4 fw-bold">Iniciar Sesión</h3>
+                    
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark w-100 mb-3 py-2 fw-bold" style="border-color: #db4437; color: #db4437;">
+                        <i class="bi bi-google me-2"></i> Ingresar con Google
+                    </a>
+
+                    <div class="text-center text-muted mb-3">- O usa tu correo -</div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Entrar</button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">¿No tienes cuenta?</p>
+                        <a href="{% url 'registro' %}" class="text-decoration-none fw-bold">Regístrate aquí</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Script para añadir estilos Bootstrap a los inputs de Django
+    var inputs = document.querySelectorAll('input');
+    inputs.forEach(function(input){
+        input.classList.add('form-control');
+    });
+</script>
+{% endblock %}
