@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Estilos básicos para email (inline es mejor para compatibilidad) */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { background-color: #212529; color: #ffc107; padding: 20px; text-align: center; }
+        .content { padding: 30px; text-align: center; }
+        .product-img { max-height: 200px; margin-bottom: 20px; }
+        .price-box { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #0d6efd; text-align: left; }
+        .old-price { text-decoration: line-through; color: #6c757d; font-size: 14px; }
+        .new-price { color: #0d6efd; font-size: 24px; font-weight: bold; }
+        .btn { display: inline-block; background-color: #ffc107; color: #000; text-decoration: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; margin-top: 20px; }
+        .footer { background-color: #eee; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Todo Protein</h1>
+        </div>
+        <div class="content">
+            <h2>¡Bajó de Precio! 📉</h2>
+            <p>Hola <strong>{{ usuario }}</strong>, tenemos buenas noticias.</p>
+            <p>El producto que estabas siguiendo ha bajado de precio.</p>
+            
+            <img src="{{ imagen_url }}" alt="Producto" class="product-img">
+            
+            <h3>{{ producto_nombre }}</h3>
+            
+            <div class="price-box">
+                <div>Antes: <span class="old-price">${{ precio_anterior }}</span></div>
+                <div>Ahora: <span class="new-price">${{ precio_nuevo }}</span></div>
+                <div style="color: #198754; font-weight: bold; margin-top: 5px;">
+                    ¡Ahorras ${{ ahorro }}!
+                </div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    Tienda: {{ tienda }}
+                </div>
+            </div>
+
+            <a href="{{ link_compra }}" class="btn">Ir a la Oferta</a>
+        </div>
+        <div class="footer">
+            <p>Estás recibiendo esto porque guardaste este producto en tus favoritos.</p>
+            <p>&copy; 2025 Todo Protein</p>
+        </div>
+    </div>
+</body>
+</html>

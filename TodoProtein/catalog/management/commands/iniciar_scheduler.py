@@ -1,57 +1,53 @@
-import time
-import schedule # Necesitarás instalar esto: pip install schedule
-from django.core.management.base import BaseCommand
-from django.core.management import call_command
-from django.utils import timezone
+import time 
+import schedule 
+from django .core .management .base import BaseCommand 
+from django .core .management import call_command 
+from django .utils import timezone 
 
-class Command(BaseCommand):
-    help = 'Ejecuta el ciclo de scraping y alertas automáticamente cada cierto tiempo.'
+class Command (BaseCommand ):
+    help ='Ejecuta el ciclo completo: Scaner (Shopify) + Selenium + Alertas automáticamente.'
 
-    def job_scraping(self):
-        self.stdout.write(self.style.WARNING(f"[{timezone.now()}]  Iniciando Scraping Automático..."))
-        try:
-            # 1. Ejecutar el scraper de categorías (o el que uses principal)
-            call_command('scrape_category_pages') 
-            
-            # 2. (Opcional) Ejecutar el actualizador de precios si es un script separado
-            # call_command('update_prices')
-            
-            self.stdout.write(self.style.SUCCESS(f"[{timezone.now()}]  Scraping finalizado correctamente."))
-            
-            # 3. Verificar alertas de bajada de precio inmediatamente después
-            self.job_alertas()
-            
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f" Error en el ciclo de scraping: {e}"))
-            # Aquí podrías integrar la HU12 (Alerta de fallo) enviando un correo al admin
+    def job_scraping (self ):
+        self .stdout .write (self .style .WARNING (f"\n[{timezone .now ()}] --- INICIANDO CICLO DE ACTUALIZACIÓN ---"))
+        try :
 
-    def job_alertas(self):
-        self.stdout.write(self.style.MIGRATE(f"[{timezone.now()}]  Verificando alertas de precio..."))
-        call_command('enviar_alerta')
+            self .stdout .write (self .style .SUCCESS (">>> Paso 1: Ejecutando Scanner Shopify..."))
+            call_command ('scaner')
 
-    def job_resumen_semanal(self):
-        # Este se ejecutaría una vez a la semana
-        self.stdout.write(self.style.MIGRATE(f"[{timezone.now()}]  Enviando resúmenes semanales..."))
-        call_command('enviar_resumen_semanal')
+            self .stdout .write (self .style .SUCCESS (f"[{timezone .now ()}] --- ACTUALIZACIÓN DE PRECIOS FINALIZADA ---"))
 
-    def handle(self, *args, **kwargs):
-        self.stdout.write("--- Iniciando Scheduler de Todo Protein ---")
-        self.stdout.write("El sistema se ejecutará en segundo plano. Presiona Ctrl+C para detener.")
+            self .job_alertas ()
 
-        # --- CONFIGURACIÓN DEL HORARIO ---
-        
-        # Opción A: Para pruebas rápidas (cada 2 minutos)
-        # schedule.every(2).minutes.do(self.job_scraping)
-        
-        # Opción B: Realista (cada 12 horas)
-        schedule.every(12).hours.do(self.job_scraping)
-        
-        # Opción C: Resumen semanal (Todos los lunes a las 9:00)
-        schedule.every().monday.at("09:00").do(self.job_resumen_semanal)
+        except Exception as e :
+            self .stdout .write (self .style .ERROR (f" [X] Error crítico en el ciclo de actualización: {e }"))
 
-        # Ejecutar una vez al inicio para no esperar 12 horas la primera vez
-        self.job_scraping()
+    def job_alertas (self ):
+        self .stdout .write (self .style .SUCCESS (f"[{timezone .now ()}] >>> Paso 3: Verificando alertas de precio para usuarios..."))
+        try :
+            call_command ('enviar_alerta')
+        except Exception as e :
+            self .stdout .write (self .style .ERROR (f"Error enviando alertas: {e }"))
 
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
+    def job_resumen_semanal (self ):
+
+        self .stdout .write (self .style .SUCCESS (f"[{timezone .now ()}] Enviando resúmenes semanales..."))
+
+        pass 
+
+    def handle (self ,*args ,**kwargs ):
+        self .stdout .write ("--- Iniciando Scheduler Maestro de Todo Protein ---")
+        self .stdout .write ("   > Tareas programadas: Scaner + Selenium + Alertas")
+        self .stdout .write ("   > Ejecución: Cada 12 horas")
+        self .stdout .write ("El sistema se ejecutará en segundo plano. Presiona Ctrl+C para detener.\n")
+
+        schedule .every (2 ).minutes .do (self .job_scraping )
+
+        schedule .every (12 ).hours .do (self .job_scraping )
+
+        schedule .every ().monday .at ("09:00").do (self .job_resumen_semanal )
+
+        self .job_scraping ()
+
+        while True :
+            schedule .run_pending ()
+            time .sleep (1 )

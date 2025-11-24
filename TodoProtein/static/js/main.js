@@ -1,1 +1,0 @@
-// Javascript ahora es mínimo, la lógica está en Django Views

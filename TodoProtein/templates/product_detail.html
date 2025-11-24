@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
     <style>
-        /* Estilos personalizados estilo Solotodo */
+        
         .store-card {
             transition: transform 0.2s;
             border-left: 4px solid transparent;
@@ -344,8 +344,8 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        // Aquí podríamos intentar formatear, pero JS no sabe la sesión de Django fácilmente.
-                                        // Lo dejamos simple con el número crudo o signo $.
+                                        
+                                        
                                         return '$' + context.parsed.y.toLocaleString('es-CL');
                                     }
                                 }

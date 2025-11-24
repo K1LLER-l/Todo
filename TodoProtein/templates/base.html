@@ -8,41 +8,35 @@
     <title>Todo Protein</title>
     <link rel="icon" type="image/png" href="{% static 'img/icono.jpg' %}">
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
-    <!-- Tu hoja de estilos personalizada -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     <style>
-        /* --- CORRECCIÓN PARA EL FOOTER (Sticky Footer) --- */
         html, body {
-            height: 100%; /* Asegura que la página ocupe el 100% de la altura */
+            height: 100%; 
             margin: 0;
         }
         
         body {
             display: flex;
-            flex-direction: column; /* Organiza los elementos en columna vertical */
-            min-height: 100vh;      /* Mínimo el 100% de la altura de la ventana */
+            flex-direction: column; 
+            min-height: 100vh;     
         }
 
         main {
-            flex: 1; /* Esto es la CLAVE: Hace que el contenido crezca para ocupar todo el espacio libre, empujando el footer abajo */
+            flex: 1; 
         }
-        /* ------------------------------------------------- */
 
         footer {
-            margin-top: auto; /* Respaldo para asegurar que se vaya al fondo */
+            margin-top: auto; 
         }
         
         .navbar-brand {
             font-weight: bold;
             letter-spacing: 1px;
         }
-
-        /* Estilos para el dropdown del menú (que hicimos antes) */
         .dropdown-item:hover, .dropdown-item:focus {
             background-color: #0d6efd;
             color: white !important;
@@ -54,7 +48,6 @@
 </head>
 <body>
 
-    <!-- BARRA DE NAVEGACIÓN -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm">
         <div class="container-fluid px-4">
             
@@ -123,14 +116,11 @@
         </div>
     </nav>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <!-- La etiqueta <main> es la que crecerá gracias al CSS -->
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- PIE DE PÁGINA -->
     <footer class="bg-dark text-light py-4 mt-5">
         <div class="container text-center">
             <p class="mb-1">&copy; 2025 Todo Protein - Tu comparador inteligente.</p>

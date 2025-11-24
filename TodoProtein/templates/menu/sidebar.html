@@ -2,7 +2,7 @@
     <h5 class="text-uppercase text-muted mb-3 font-weight-bold">Categorías</h5>
     <div class="list-group mb-4">
         <a href="?category=all" class="list-group-item list-group-item-action {% if current_category == 'all' %}active{% endif %}">
-            📦 Todo
+            Todo
         </a>
         {% for cat in categories %}
         <a href="?category={{ cat.name }}" class="list-group-item list-group-item-action {% if current_category == cat.name %}active{% endif %}">
