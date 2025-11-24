@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load mis_filtros %}
 
 {% block content %}
 <div class="container mt-5">
@@ -12,29 +13,32 @@
         <table class="table table-bordered table-hover text-center bg-white align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 200px;" class="text-start ps-4">Características</th>
+                    <th style="width: 200px;" class="text-start ps-4 align-middle">Características</th>
                     {% for prod in productos %}
-                    <th style="min-width: 220px;">
-                        <a href="#" class="text-muted float-end text-decoration-none fs-5" onclick="removerProducto('{{ prod.id }}')">&times;</a>
+                    <th style="min-width: 220px; position: relative;">
+                        <a href="#" class="text-muted position-absolute top-0 end-0 m-2 text-decoration-none fs-4" onclick="removerProducto('{{ prod.id }}')">&times;</a>
                         
                         <div class="p-3">
-                            <img src="{{ prod.image_url }}" class="img-fluid mb-3" style="height: 120px; object-fit: contain;">
+                            <a href="{% url 'product_detail' prod.id %}">
+                                <img src="{{ prod.image_url }}" class="img-fluid mb-3" style="height: 120px; object-fit: contain;">
+                            </a>
                             <h6 class="fw-bold mb-1">
                                 <a href="{% url 'product_detail' prod.id %}" class="text-dark text-decoration-none">{{ prod.name|truncatechars:40 }}</a>
                             </h6>
-                            <small class="text-muted">{{ prod.brand }}</small>
+                            <small class="text-muted text-uppercase">{{ prod.brand }}</small>
                         </div>
                     </th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
+              
                 <tr>
                     <th class="text-start ps-4 bg-light">Mejor Precio</th>
                     {% for prod in productos %}
                     <td>
                         {% if prod.precio_minimo %}
-                            <span class="fw-bold text-primary fs-5">${{ prod.precio_minimo }}</span>
+                            <span class="fw-bold text-primary fs-5">{% precio prod.precio_minimo %}</span>
                         {% else %}
                             <span class="text-muted">--</span>
                         {% endif %}
@@ -43,30 +47,78 @@
                 </tr>
 
                 <tr>
-                    <th class="text-start ps-4 bg-light">Proteínas por porción</th>
+                    <th class="text-start ps-4 bg-light">Categoría</th>
                     {% for prod in productos %}
-                    <td class="fw-bold">
-                        {% if prod.protein_grams != "N/A" %}
-                            <span class="badge bg-success fs-6">{{ prod.protein_grams }}</span>
+                    <td><span class="badge bg-light text-dark border">{{ prod.categoria.name }}</span></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-group-divider">
+                    <th class="text-start ps-4 bg-secondary text-white" colspan="{{ productos|length|add:1 }}">
+                        Información Nutricional (por porción)
+                    </th>
+                </tr>
+
+                <tr>
+                    <th class="text-start ps-4 bg-light">Proteínas</th>
+                    {% for prod in productos %}
+                    <td class="fw-bold text-success">
+                        {% if prod.protein_grams > 0 %}
+                            {{ prod.protein_grams|stringformat:".2f" }}g
                         {% else %}
-                            <span class="text-muted">No disponible</span>
+                            <span class="text-muted small">N/A</span>
                         {% endif %}
                     </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <th class="text-start ps-4 bg-light">Categoría</th>
+                    <th class="text-start ps-4 bg-light">Calorías</th>
                     {% for prod in productos %}
-                    <td>{{ prod.categoria.name }}</td>
+                    <td>
+                        {% if prod.calories > 0 %}
+                            {{ prod.calories|stringformat:".2f" }} kcal
+                        {% else %}
+                            <span class="text-muted small">N/A</span>
+                        {% endif %}
+                    </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
+                    <th class="text-start ps-4 bg-light">Grasas Totales</th>
+                    {% for prod in productos %}
+                    <td>
+                        {% if prod.fat_grams > 0 %}
+                            {{ prod.fat_grams|stringformat:".2f" }}g
+                        {% else %}
+                            <span class="text-muted small">N/A</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <th class="text-start ps-4 bg-light">Carbohidratos</th>
+                    {% for prod in productos %}
+                    <td>
+                        {% if prod.carbs_grams > 0 %}
+                            {{ prod.carbs_grams|stringformat:".2f" }}g
+                        {% else %}
+                            <span class="text-muted small">N/A</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                
+                <tr>
                     <th class="text-start ps-4 bg-light">Acción</th>
                     {% for prod in productos %}
                     <td class="p-3">
-                        <a href="{% url 'product_detail' prod.id %}" class="btn btn-outline-primary w-100">Ver Detalles</a>
+                        <a href="{% url 'product_detail' prod.id %}" class="btn btn-primary w-100 rounded-pill">
+                            Ver Ofertas
+                        </a>
                     </td>
                     {% endfor %}
                 </tr>
@@ -74,25 +126,29 @@
         </table>
     </div>
     {% else %}
-        <div class="alert alert-warning text-center py-5">
+        <div class="alert alert-warning text-center py-5 shadow-sm">
+            <i class="bi bi-basket fs-1 mb-3 d-block"></i>
             <h4>No has seleccionado productos para comparar</h4>
-            <p>Vuelve al catálogo y selecciona al menos dos productos.</p>
-            <a href="{% url 'home' %}" class="btn btn-primary mt-3">Ir al Catálogo</a>
+            <p class="text-muted">Vuelve al catálogo y selecciona hasta 4 productos usando la casilla de verificación.</p>
+            <a href="{% url 'home' %}" class="btn btn-dark mt-3 px-4 fw-bold">Ir al Catálogo</a>
         </div>
     {% endif %}
 </div>
 
 <script>
-    // Función simple para quitar un producto de la URL y recargar
     function removerProducto(idToRemove) {
         const urlParams = new URLSearchParams(window.location.search);
-        let ids = urlParams.get('ids').split(',');
+        let ids = urlParams.get('ids');
         
-        // Filtrar el ID que queremos borrar
-        ids = ids.filter(id => id != idToRemove);
-        
-        if (ids.length > 0) {
-            window.location.href = `?ids=${ids.join(',')}`;
+        if (ids) {
+            let idsArray = ids.split(',');
+            idsArray = idsArray.filter(id => id != idToRemove);
+            
+            if (idsArray.length > 0) {
+                window.location.href = `?ids=${idsArray.join(',')}`;
+            } else {
+                window.location.href = "{% url 'home' %}";
+            }
         } else {
             window.location.href = "{% url 'home' %}";
         }

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Producto, Categoria, Tienda, Oferta, PrecioHistorico # <--- Agregamos PrecioHistorico
+from .models import Producto, Categoria, Tienda, Oferta, PrecioHistorico, Promocion
 
 # Configuración para ver las Ofertas DENTRO de la pantalla del Producto
 class OfertaInline(admin.TabularInline):
@@ -36,7 +36,28 @@ class PrecioHistoricoAdmin(admin.ModelAdmin):
     search_fields = ('producto__name',)
     ordering = ('-fecha',)
 
+# Configuración Mejorada de TIENDA (HU10)
+@admin.register(Tienda)
+class TiendaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'url_busqueda')
+    search_fields = ('name',)
+    
+    # Organizamos los campos en secciones para que se vea profesional
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('name', 'logo')
+        }),
+        ('Configuración del Scraper', {
+            'fields': ('url_busqueda', 'container_tag', 'container_class', 'titulo_selector', 'precio_selector', 'imagen_selector'),
+            'description': 'Define aquí los selectores CSS para que el robot sepa cómo leer esta tienda.',
+        }),
+    )
+
+@admin.register(Promocion)
+class PromocionAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'activa', 'descuento_minimo', 'fecha_inicio')
+    list_editable = ('activa',)
+
 # Registros simples
 admin.site.register(Categoria)
-admin.site.register(Tienda)
 admin.site.register(Oferta)

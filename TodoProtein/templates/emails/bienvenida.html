@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
+        .header { background-color: #212529; color: #ffc107; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { padding: 20px; }
+        .btn { display: inline-block; background-color: #198754; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¡Bienvenido a Todo Protein! ⚡</h1>
+        </div>
+        <div class="content">
+            <p>Hola <strong>{{ user.first_name }}</strong>,</p>
+            <p>Gracias por registrarte en nuestra plataforma. Ahora podrás:</p>
+            <ul>
+                <li>Guardar tus productos favoritos ❤️</li>
+                <li>Configurar alertas de precio 📉</li>
+                <li>Comparar suplementos nutricionalmente 📊</li>
+            </ul>
+            <p>Esperamos que encuentres las mejores ofertas.</p>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="http://127.0.0.1:8000/" class="btn">Ir al Catálogo</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

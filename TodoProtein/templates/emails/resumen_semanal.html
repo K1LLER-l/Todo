@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8f9fa; padding: 20px; margin: 0; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background-color: #212529; padding: 30px 20px; text-align: center; }
+        .header h1 { color: #ffc107; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .content { padding: 30px 20px; }
+        .intro { font-size: 16px; color: #333; margin-bottom: 20px; text-align: center; }
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { text-align: left; color: #6c757d; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #dee2e6; padding: 10px; }
+        td { padding: 15px 10px; border-bottom: 1px solid #dee2e6; vertical-align: middle; }
+        .product-img { width: 50px; height: 50px; object-fit: contain; border-radius: 4px; border: 1px solid #dee2e6; padding: 2px; }
+        .product-name { font-weight: bold; color: #212529; text-decoration: none; display: block; font-size: 14px; }
+        .price { font-weight: bold; font-size: 15px; color: #212529; }
+        
+        /* Etiquetas de variación */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .badge-down { background-color: #d1e7dd; color: #0f5132; } /* Verde claro */
+        .badge-up { background-color: #f8d7da; color: #842029; }   /* Rojo claro */
+        .badge-equal { background-color: #e2e3e5; color: #41464b; } /* Gris claro */
+
+        .cta-button { display: block; width: 200px; margin: 30px auto 0; background-color: #ffc107; color: #000; text-align: center; padding: 12px 0; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 14px; }
+        .footer { background-color: #f1f1f1; text-align: center; padding: 20px; font-size: 12px; color: #6c757d; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Todo Protein</h1>
+        </div>
+        <div class="content">
+            <div class="intro">
+                <p>Hola <strong>{{ user.first_name|default:user.username }}</strong>,</p>
+                <p>Aquí tienes el resumen semanal de tus productos favoritos.</p>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">Producto</th>
+                            <th>Precio Hoy</th>
+                            <th>Variación (7 días)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in reporte %}
+                        <tr>
+                            <td width="60">
+                                <img src="{{ item.imagen }}" alt="Img" class="product-img">
+                            </td>
+                            <td>
+                                <a href="{{ item.link }}" class="product-name">
+                                    {{ item.nombre }}
+                                </a>
+                            </td>
+                            <td class="price">${{ item.precio_hoy }}</td>
+                            <td>
+                                {% if item.estado == "BAJÓ" %}
+                                    <span class="badge badge-down">▼ ${{ item.diferencia }}</span>
+                                {% elif item.estado == "SUBIÓ" %}
+                                    <span class="badge badge-up">▲ ${{ item.diferencia }}</span>
+                                {% else %}
+                                    <span class="badge badge-equal">= Igual</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="http://127.0.0.1:8000/favoritos/" class="cta-button">Ver mis Favoritos</a>
+        </div>
+        <div class="footer">
+            <p>Recibes este correo porque estás suscrito a Todo Protein.</p>
+            <p>&copy; 2025 Todo Protein.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -78,6 +78,15 @@ class Command(BaseCommand):
                 'marca_default': 'En Línea',
                 'categoria_fija': 'Despensa y Otros',
                 **EEL_SELECTORS
+            },
+            {
+                'nombre_sitio': 'Supletech - Proteínas',
+                'tienda_name': 'Supletech',
+                'url': 'https://www.supletech.cl/suplementos-alimenticios/proteinas',
+                'base_url': '', 
+                'marca_default': 'Supletech',
+                'categoria_fija': 'Proteínas en Polvo',
+                **EEL_SELECTORS
             }
         ]
 
