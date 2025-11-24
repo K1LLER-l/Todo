@@ -88,10 +88,34 @@
                                         <span class="text-muted">Categoría</span>
                                         <span class="fw-bold">{{ producto.categoria.name }}</span>
                                     </li>
+                                    
+                                   
                                     <li class="list-group-item d-flex justify-content-between px-0">
                                         <span class="text-muted">Proteínas</span>
-                                        <span class="badge bg-success">{{ producto.protein_grams }}</span>
+                                        <span class="badge bg-success">{{ producto.protein_grams|redondear }} g</span>
                                     </li>
+                                    
+                                    {% if producto.calories > 0 %}
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted">Calorías</span>
+                                        <span class="fw-bold">{{ producto.calories|redondear }} kcal</span>
+                                    </li>
+                                    {% endif %}
+
+                                    {% if producto.fat_grams > 0 %}
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted">Grasas Totales</span>
+                                        <span class="fw-bold">{{ producto.fat_grams|redondear }} g</span>
+                                    </li>
+                                    {% endif %}
+
+                                    {% if producto.carbs_grams > 0 %}
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted">Carbohidratos</span>
+                                        <span class="fw-bold">{{ producto.carbs_grams|redondear }} g</span>
+                                    </li>
+                                    {% endif %}
+                                    
                                 </ul>
 
                                 <div class="alert alert-warning mt-3 d-flex align-items-center" role="alert">
@@ -103,6 +127,44 @@
                     </div>
                 </div>
 
+                {% if user.is_authenticated and es_favorito %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-bell-fill text-warning me-2"></i> Configurar Alerta de Precio</h5>
+                        <p class="text-muted small">Recibirás un correo si el precio de este producto baja de tu precio deseado.</p>
+
+                        <form method="POST" action="{% url 'set_precio_deseado' producto.id %}" class="d-flex align-items-end">
+                            {% csrf_token %}
+                            <div class="flex-grow-1 me-3">
+                                <label for="precioMinimo" class="form-label small fw-bold mb-1">Precio Deseado (en CLP)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="precioMinimo" 
+                                           name="precio_minimo" 
+                                           value="{{ precio_deseado|default:0 }}"
+                                           min="0" 
+                                           placeholder="Ej: 15000">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning fw-bold">Guardar</button>
+                        </form>
+                        
+                        {% with mejor_precio=opciones.first.price %}
+                            {% if precio_deseado > 0 and mejor_precio and mejor_precio < precio_deseado %}
+                                <div class="alert alert-success mt-3 p-2 small fw-bold">
+                                    ¡ALERTA CUMPLIDA! El precio actual ({% precio mejor_precio %}) es menor a tu precio deseado ({% precio precio_deseado %}).
+                                </div>
+                            {% elif precio_deseado > 0 %}
+                                <div class="alert alert-info mt-3 p-2 small">
+                                    Alerta activa. Esperando precio menor a <strong>{% precio precio_deseado %}</strong>. Precio actual: <strong>{% precio mejor_precio %}</strong>.
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endif %}
                 {% if promedio_precio %}
                 <div class="row mb-4">
                     <div class="col-12">
@@ -135,30 +197,56 @@
                     </div>
                 </div>
 
-                <h4 class="fw-bold mt-5 mb-3">Productos Similares</h4>
+                <h4 class="fw-bold mt-5 mb-3">
+                    {% if tipo_recomendacion == "Mejores Opciones" %}
+                        <i class="bi text-warning"></i> {{ tipo_recomendacion }}
+                    {% else %}
+                        {{ tipo_recomendacion }}
+                    {% endif %}
+                </h4>
+
                 {% if productos_similares %}
                 <div class="row row-cols-1 row-cols-md-3 g-3">
                     {% for similar in productos_similares %}
                     <div class="col">
-                        <div class="card h-100 shadow-sm border-0">
+                        <div class="card h-100 shadow-sm border-0 position-relative">
+                            
+                            {% if precio_referencia and similar.min_price < precio_referencia %}
+                                <div class="position-absolute top-0 start-0 m-2 badge bg-success shadow-sm">
+                                    Ahorras: {% widthratio precio_referencia|add:"-"|add:similar.min_price 1 1 %}
+                                    </div>
+                            {% endif %}
+
                             <a href="{% url 'product_detail' similar.id %}">
                                 <img src="{{ similar.image_url }}" class="card-img-top p-3" alt="{{ similar.name }}" style="height: 120px; object-fit: contain;">
                             </a>
                             <div class="card-body p-2 text-center">
-                                <h6 class="card-title text-truncate"><a href="{% url 'product_detail' similar.id %}" class="text-dark text-decoration-none">{{ similar.name }}</a></h6>
+                                <h6 class="card-title text-truncate">
+                                    <a href="{% url 'product_detail' similar.id %}" class="text-dark text-decoration-none">{{ similar.name }}</a>
+                                </h6>
+                                
                                 <p class="fw-bold text-primary mb-1">
-                                    {% if similar.ofertas.first %}
-                                        {% precio similar.ofertas.first.price %}
+                                    {% if similar.min_price %}
+                                        {% precio similar.min_price %}
                                     {% else %}
                                         --
                                     {% endif %}
                                 </p>
+                                
+                                <small class="text-muted d-block">
+                                    {{ similar.protein_grams }}g Proteína
+                                    {% if similar.protein_grams >= producto.protein_grams %}
+                                        <i class="bi bi-check-circle-fill text-success" title="Igual o más proteína"></i>
+                                    {% endif %}
+                                </small>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% endif %}
+
+                
             </div>
 
             <div class="col-lg-4">

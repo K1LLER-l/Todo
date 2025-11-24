@@ -77,7 +77,28 @@ DATABASES = {
     }
 }
 
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [{
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    # 2. Validar longitud mínima (AHORA USANDO TU CÓDIGO)
+    {
+        'NAME': 'catalog.validador.ValidarLongitudMinima', # <--- CAMBIO AQUÍ
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    # 3. Contraseña común (Django por defecto)
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    # 4. Solo números (Django por defecto)
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    # 5. Mayúsculas y Números (TU CÓDIGO ANTERIOR)
+    {
+        'NAME': 'catalog.validador.ValidarMayusculaNumero',
+    },]
 LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True

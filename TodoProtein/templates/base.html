@@ -8,27 +8,53 @@
     <title>Todo Protein</title>
     <link rel="icon" type="image/png" href="{% static 'img/icono.jpg' %}">
     
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
+    <!-- Tu hoja de estilos personalizada -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
     <style>
-
+        /* --- CORRECCIÓN PARA EL FOOTER (Sticky Footer) --- */
+        html, body {
+            height: 100%; /* Asegura que la página ocupe el 100% de la altura */
+            margin: 0;
+        }
+        
         body {
-            min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Organiza los elementos en columna vertical */
+            min-height: 100vh;      /* Mínimo el 100% de la altura de la ventana */
         }
+
+        main {
+            flex: 1; /* Esto es la CLAVE: Hace que el contenido crezca para ocupar todo el espacio libre, empujando el footer abajo */
+        }
+        /* ------------------------------------------------- */
+
         footer {
-            margin-top: auto;
+            margin-top: auto; /* Respaldo para asegurar que se vaya al fondo */
         }
+        
         .navbar-brand {
             font-weight: bold;
             letter-spacing: 1px;
+        }
+
+        /* Estilos para el dropdown del menú (que hicimos antes) */
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #0d6efd;
+            color: white !important;
+        }
+        .dropdown-item:hover i, .dropdown-item:focus i {
+            color: white !important;
         }
     </style>
 </head>
 <body>
 
+    <!-- BARRA DE NAVEGACIÓN -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm">
         <div class="container-fluid px-4">
             
@@ -59,17 +85,17 @@
                         {% else %}
                             🇨🇱 CLP
                         {% endif %}
-
                     </a>
+
                     {% if user.is_authenticated %}
                         <div class="dropdown">
                             <button class="btn btn-outline-light dropdown-toggle border-0 d-flex align-items-center" type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle fs-5 me-2"></i>
-                                <span>Hola, {{ user.username }}</span>
+                                <span>Hola, {{ user.first_name|default:user.username }}</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li><h6 class="dropdown-header">Mi Cuenta</h6></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i> Perfil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'perfil_usuario' %}"><i class="bi bi-person me-2"></i> Perfil</a></li>
                                 <li><a class="dropdown-item" href="{% url 'lista_favoritos' %}"><i class="bi bi-heart me-2"></i> Favoritos</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -97,11 +123,14 @@
         </div>
     </nav>
 
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- La etiqueta <main> es la que crecerá gracias al CSS -->
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
+    <!-- PIE DE PÁGINA -->
     <footer class="bg-dark text-light py-4 mt-5">
         <div class="container text-center">
             <p class="mb-1">&copy; 2025 Todo Protein - Tu comparador inteligente.</p>

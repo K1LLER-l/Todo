@@ -8,10 +8,67 @@
         </aside>
 
         <main class="col-md-9 col-lg-10">
+                {% if promocion_activa and productos_en_oferta %}
+        <div class="alert alert-warning border-warning shadow-sm mt-3 mb-4" role="alert" style="background: linear-gradient(to right, #fff3cd, #ffffff);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="alert-heading fw-bold mb-1">
+                        <i class="bi bi-megaphone-fill text-danger me-2"></i> {{ promocion_activa.titulo }}
+                    </h4>
+                    <p class="mb-0 text-dark">{{ promocion_activa.descripcion }}</p>
+                </div>
+                <span class="badge bg-danger fs-6">¡Descuentos > {{ promocion_activa.descuento_minimo }}%!</span>
+            </div>
+            
+            <hr>
+            
+            <div class="row row-cols-1 row-cols-md-4 g-3 mt-2">
+                {% for prod in productos_en_oferta %}
+                <div class="col">
+                    <div class="card h-100 border-danger border-2">
+                        <div class="position-absolute top-0 end-0 bg-danger text-white px-2 py-1 fw-bold rounded-start" style="font-size: 0.8rem;">
+                            -{{ prod.porcentaje_descuento }}%
+                        </div>
+                        <img src="{{ prod.image_url }}" class="card-img-top p-2" style="height: 100px; object-fit: contain;">
+                        <div class="card-body p-2 text-center">
+                            <h6 class="card-title text-truncate" style="font-size: 0.9rem;">{{ prod.name }}</h6>
+                            <div class="fw-bold text-danger">{% precio prod.precio_actual %}</div>
+                            <a href="{% url 'product_detail' prod.id %}" class="stretched-link"></a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+            {% if recomendados_usuario %}
+        <div class="mb-5">
+            <h4 class="fw-bold text-dark mb-3">
+                <i class="bi bi-lightbulb-fill text-primary"></i> Porque buscaste "{{ ultima_busqueda }}"
+            </h4>
+            <div class="row row-cols-1 row-cols-md-4 g-3">
+                {% for prod in recomendados_usuario %}
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <a href="{% url 'product_detail' prod.id %}">
+                            <img src="{{ prod.image_url }}" class="card-img-top p-3" style="height: 150px; object-fit: contain;">
+                        </a>
+                        <div class="card-body p-2">
+                            <h6 class="card-title text-truncate"><a href="{% url 'product_detail' prod.id %}" class="text-dark text-decoration-none">{{ prod.name }}</a></h6>
+                            <div class="fw-bold text-primary">{% precio prod.precio_minimo %}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <hr>
+        {% endif %}
             
             {% if destacados %}
             <div class="mb-5">
-                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-fire text-danger"></i> Lo más popular hoy</h4>
+                <h4 class="fw-bold text-dark mb-3"><i class="bi text-danger"></i> Lo más popular</h4>
                 <div class="row row-cols-1 row-cols-md-3 g-3">
                     {% for prod in destacados %}
                     <div class="col">

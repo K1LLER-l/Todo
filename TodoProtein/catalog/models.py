@@ -2,9 +2,24 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # 1. MODELO DE LA TIENDA (Para no repetir nombres)
+# catalog/models.py
+
 class Tienda(models.Model):
     name = models.CharField(max_length=100, unique=True)
     logo = models.URLField(blank=True, null=True) # Opcional: Logo de la tienda
+    
+    # --- NUEVOS CAMPOS PARA HU10: CONFIGURACIÓN DE SCRAPING ---
+    # URL base donde el scraper empezará a buscar
+    url_busqueda = models.URLField(blank=True, null=True, verbose_name="URL de Búsqueda/Categoría")
+    
+    # Reglas para encontrar la tarjeta del producto
+    container_tag = models.CharField(max_length=50, blank=True, default="div", verbose_name="Tag del Contenedor (ej: div, article)")
+    container_class = models.CharField(max_length=100, blank=True, null=True, verbose_name="Clase del Contenedor")
+    
+    # Selectores CSS internos para extraer los datos
+    titulo_selector = models.CharField(max_length=100, blank=True, null=True, verbose_name="Selector Título (CSS)")
+    precio_selector = models.CharField(max_length=100, blank=True, null=True, verbose_name="Selector Precio (CSS)")
+    imagen_selector = models.CharField(max_length=100, blank=True, null=True, verbose_name="Selector Imagen (CSS)")
     
     def __str__(self):
         return self.name
@@ -77,3 +92,21 @@ class Favorito(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} -> {self.producto.name}"
+    
+class Promocion(models.Model):
+    titulo = models.CharField(max_length=100, verbose_name="Título del Evento")
+    descripcion = models.TextField(verbose_name="Descripción")
+    activa = models.BooleanField(default=False, verbose_name="¿Está activa?")
+    descuento_minimo = models.IntegerField(default=20, verbose_name="Descuento Mínimo (%) para mostrar")
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.titulo} ({'Activa' if self.activa else 'Inactiva'})"
+    
+class HistorialBusqueda(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    termino = models.CharField(max_length=100)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} busco '{self.termino}'"

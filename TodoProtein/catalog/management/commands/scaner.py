@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import requests
 import json
-import traceback # Para obtener el detalle del error
+import traceback
 from thefuzz import fuzz, process
 
 class Command(BaseCommand):
@@ -14,15 +14,17 @@ class Command(BaseCommand):
         
         # --- BLOQUE DE SEGURIDAD (HU12) ---
         try:
-            # --- 1. TIENDAS SHOPIFY ---
+            # --- 1. CONFIGURACIÓN DE TIENDAS (SOLO SHOPIFY COMPATIBLES) ---
+            # Se agregaron las URLs nuevas compatibles con este motor JSON
             TIENDAS_SHOPIFY = [
                 {'nombre': 'All Nutrition', 'url_json': 'https://allnutrition.cl/products.json?limit=250'},
-                {'nombre': 'Booz', 'url_json': 'https://www.booz.cl/products.json?limit=250'},
                 {'nombre': 'Mayorista WF', 'url_json': 'https://mayorista.thewildfoods.com/products.json?limit=250'},
+                {'nombre': 'Wild Foods',   'url_json': 'https://thewildfoods.com/products.json?limit=250'}, # <-- Agregada del código nuevo
                 {'nombre': 'Chile Be Free', 'url_json': 'https://chilebefree.com/products.json?limit=250'},
+                {'nombre': 'Chile suplemento', 'url_json': 'https://www.chilesuplementos.cl/categoria/productos/vitaminas-y-wellness/.json?limit=250'},
             ]
 
-            # NO DESCOMENTAR 
+            # NO DESCOMENTAR (Para pruebas de estrés)
             #raise Exception("¡Prueba de Alerta HU12! El scanner JSON colapsó.")
 
             mis_productos = list(Producto.objects.all())
@@ -44,13 +46,23 @@ class Command(BaseCommand):
                 self.stdout.write(f">>> Descargando catálogo de: {nombre_tienda}...")
 
                 try:
-                    response = requests.get(url, headers=HEADERS, timeout=20) # Aumenté el timeout a 20s
+                    response = requests.get(url, headers=HEADERS, timeout=20)
                     if response.status_code != 200:
                         self.stdout.write(self.style.ERROR(f"   Error conectando a {nombre_tienda} (Status {response.status_code})"))
                         continue
                     
-                    data = response.json()
+                    try:
+                        data = response.json()
+                    except json.JSONDecodeError:
+                        self.stdout.write(self.style.ERROR(f"   Error: La respuesta de {nombre_tienda} no es un JSON válido."))
+                        continue
+
+                    # Validación específica para estructura Shopify
                     productos_externos = data.get('products', [])
+                    if not productos_externos:
+                        self.stdout.write(self.style.WARNING(f"   JSON válido pero sin productos en {nombre_tienda} (¿Cambió la estructura?)"))
+                        continue
+
                     self.stdout.write(f"    Recibidos {len(productos_externos)} productos. Analizando...")
 
                     tienda_obj, _ = Tienda.objects.get_or_create(name=nombre_tienda)
@@ -58,14 +70,21 @@ class Command(BaseCommand):
 
                     for item in productos_externos:
                         titulo_externo = item['title']
+                        # Fuzzy Matching
                         mejor_match, puntaje = process.extractOne(titulo_externo.lower(), lista_nombres_locales, scorer=fuzz.token_set_ratio)
 
                         if puntaje >= 85:
                             producto_local = mis_productos_map[mejor_match]
                             try:
-                                variante = item['variants'][0]
-                                precio = int(float(variante['price']))
-                                slug = item['handle']
+                                # Lógica de extracción segura
+                                variants = item.get('variants', [])
+                                if not variants: continue
+                                
+                                variante = variants[0]
+                                price_raw = variante.get('price', 0)
+                                precio = int(float(price_raw))
+                                
+                                slug = item.get('handle', '')
                                 domain = url.split('/products.json')[0]
                                 url_final = f"{domain}/products/{slug}"
 
@@ -83,10 +102,11 @@ class Command(BaseCommand):
                                         price=precio
                                     )
 
-                                    self.stdout.write(self.style.SUCCESS(f"    [MATCH {puntaje}%] {titulo_externo[:40]}... -> ${precio}"))
+                                    self.stdout.write(self.style.SUCCESS(f"    [MATCH {puntaje}%] {titulo_externo[:30]}... -> ${precio}"))
                                     matches_count += 1
 
-                            except Exception:
+                            except Exception as e_item:
+                                # Error en un producto individual no detiene el loop
                                 continue
                     
                     if matches_count == 0:
@@ -117,7 +137,7 @@ class Command(BaseCommand):
                     subject=asunto,
                     message=mensaje,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.EMAIL_HOST_USER], # Se envía a tu correo configurado
+                    recipient_list=[settings.EMAIL_HOST_USER],
                     fail_silently=False,
                 )
                 self.stdout.write(self.style.SUCCESS(">> Correo de alerta enviado con éxito."))
